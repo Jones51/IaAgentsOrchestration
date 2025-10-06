@@ -1,0 +1,653 @@
+{
+  "name": "My workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        0,
+        0
+      ],
+      "id": "7302b339-a75c-441d-a786-ada04636a54c",
+      "name": "When chat message received",
+      "webhookId": "1ae90b2a-7108-4c11-8927-82ae91490b1e"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.chatInput }}",
+        "options": {
+          "systemMessage": "Você é um agente de IA que orquestra outros agentes especialistas.\n\nSempre que alguém pedir pra você enviar um e-mail para uma pessoa específica, use o \"Agente de Contatos\" para buscar o e-mail dessa contato e só depois use o \"Agente de Email\" para criar o e-mail e enviá-lo.\n\nVocê não deve criar e-mail, utilize o \"Agente de Email\" para isso."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        208,
+        0
+      ],
+      "id": "1bfb9e81-057a-404b-ac07-b32e778b1571",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "toolDescription": "Agente que gerencia meus emails",
+        "text": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Prompt__User_Message_', ``, 'string') }}",
+        "options": {
+          "systemMessage": "Sempre que for enviar um e-mail, formate a mensagem em HTML"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agentTool",
+      "typeVersion": 2.2,
+      "position": [
+        -400,
+        512
+      ],
+      "id": "a6e52a5e-36c7-46c7-b8ab-f39c38491cb9",
+      "name": "Agente de Email"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('To', ``, 'string') }}",
+        "subject": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Subject', ``, 'string') }}",
+        "message": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Message', ``, 'string') }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.1,
+      "position": [
+        -288,
+        704
+      ],
+      "id": "62f7d36a-7c49-46a3-93f0-ccbdd29e7f2f",
+      "name": "Envio de Email",
+      "webhookId": "36695aa1-d465-4258-80ac-4e55a9e473e4",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "YG87QloxIi6lodyV",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "filters": {}
+      },
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.1,
+      "position": [
+        -144,
+        704
+      ],
+      "id": "7c99babf-9dfd-4e1d-9a98-e49cfc11543a",
+      "name": "Buscar Emails",
+      "webhookId": "a59957a6-e3ff-4fbc-961a-d0d4f9a31ac4",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "YG87QloxIi6lodyV",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "toolDescription": "Agente responsável por gerenciar meus contatos",
+        "text": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Prompt__User_Message_', ``, 'string') }}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agentTool",
+      "typeVersion": 2.2,
+      "position": [
+        128,
+        496
+      ],
+      "id": "54a0b04e-15f1-4574-8440-d1afd3c7ff60",
+      "name": "Agente de Contatos"
+    },
+    {
+      "parameters": {
+        "familyName": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Family_Name', ``, 'string') }}",
+        "givenName": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Given_Name', ``, 'string') }}",
+        "additionalFields": {
+          "emailsUi": {
+            "emailsValues": [
+              {
+                "type": "work",
+                "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('emailsValues0_Value', ``, 'string') }}"
+              }
+            ]
+          },
+          "phoneUi": {
+            "phoneValues": [
+              {
+                "type": "mobile",
+                "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('phoneValues0_Value', ``, 'string') }}"
+              }
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.googleContactsTool",
+      "typeVersion": 1,
+      "position": [
+        272,
+        688
+      ],
+      "id": "f7ce238a-37e8-4572-8f77-469f69131e68",
+      "name": "Criar Contatos",
+      "credentials": {
+        "googleContactsOAuth2Api": {
+          "id": "I9W1ZfPdPaD0pDGR",
+          "name": "Google Contacts account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "limit": 500,
+        "fields": [
+          "emailAddresses",
+          "addresses",
+          "names"
+        ],
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleContactsTool",
+      "typeVersion": 1,
+      "position": [
+        416,
+        688
+      ],
+      "id": "eedac7c3-ce52-45a4-bd92-0eeeae1c4bfc",
+      "name": "Buscar Contatos",
+      "credentials": {
+        "googleContactsOAuth2Api": {
+          "id": "I9W1ZfPdPaD0pDGR",
+          "name": "Google Contacts account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        112,
+        176
+      ],
+      "id": "0a84a215-5347-415b-99e3-ae246e56e8d4",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "GdTlgo0E621i1anZ",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -448,
+        704
+      ],
+      "id": "851ca733-bf64-4560-8223-22edda284915",
+      "name": "Google Gemini Chat Model1",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "GdTlgo0E621i1anZ",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        80,
+        688
+      ],
+      "id": "662318f5-f18b-4542-8006-e18303b95d72",
+      "name": "Google Gemini Chat Model2",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "GdTlgo0E621i1anZ",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "toolDescription": "Agente responsável por informações de localização/mapas",
+        "text": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Prompt__User_Message_', ``, 'string') }}",
+        "options": {
+          "systemMessage": "Você um agente responsável por trazer dados de localização/mapas."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agentTool",
+      "typeVersion": 2.2,
+      "position": [
+        1040,
+        336
+      ],
+      "id": "fa8050e0-bc76-4fa0-81b9-60e2b82820bb",
+      "name": "Agente de Mapas"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        1040,
+        496
+      ],
+      "id": "355cdc20-e9f5-4d57-99b3-20ffd573abf5",
+      "name": "Google Gemini Chat Model3",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "GdTlgo0E621i1anZ",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "endpointUrl": "https://mcp.apify.com/?tools=compass/crawler-google-places",
+        "authentication": "bearerAuth",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.mcpClientTool",
+      "typeVersion": 1.1,
+      "position": [
+        1184,
+        528
+      ],
+      "id": "c6ee6a5b-f161-4fcc-ab77-965e3e6049f1",
+      "name": "MCP Client",
+      "credentials": {
+        "httpBearerAuth": {
+          "id": "sG1SpqJdZ5NVAvlN",
+          "name": "Bearer Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        560,
+        0
+      ],
+      "id": "2cf2038b-ea04-414f-b9b9-cbeb95621f6e",
+      "name": "No Operation, do nothing"
+    },
+    {
+      "parameters": {
+        "toolDescription": "Agente responsável pelo calendário",
+        "text": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Prompt__User_Message_', ``, 'string') }}",
+        "options": {
+          "systemMessage": "VOCÊ É UM ASSISTENTE DE CALENDÁRIO.\nSua principal função é receber pedidos de agendamento em linguagem natural e convertê-los em um formato estruturado AAAA-MM-DD HH:MM:SS.\n\n**Regras de Interpretação de Data e Hora:**\n\n1.  **Data Relativa:** Se o usuário usar termos como 'Hoje', 'Amanhã', 'Próxima Segunda', 'Daqui a 3 dias', você DEVE calcular a data exata com base na data atual (a data atual é: [INSIRA A DATA ATUAL AQUI, ex: 2025-10-06]).\n2.  **Hora Implícita:** Se o usuário não especificar a hora, assuma '10:00:00' por padrão, ou peça a hora de forma gentil.\n3.  **Formato Final:** O resultado da sua conversão DEVE SEMPRE ser retornado no formato `AAAA-MM-DD HH:MM:SS`.\n4.  **Duração Padrão:** Se a duração ou hora de término não for fornecida pelo usuário, calcule o FIM como sendo **1 HORA APÓS O INÍCIO**.\n5.  **Lembretes:** O valor padrão para lembretes é **NÃO (sim/não)**. Nunca pergunte ao usuário sobre lembretes.\n\n**Exemplo de Entrada do Usuário:** \"Agenda a corrida hoje às 15:00\"\n\n**Sua Ação:**\n* `Título:` Corrida\n* `Início (Calculado):` [Data Atual] 15:00:00\n* `Fim (Padrão/Calculado):` [Data Atual] 16:00:00\n* `Lembretes (Padrão):` Não\n* Criar o evento no calendário"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agentTool",
+      "typeVersion": 2.2,
+      "position": [
+        640,
+        496
+      ],
+      "id": "19ba907c-5cdc-4b73-9e4b-6f2434d74006",
+      "name": "Agente de Calendário"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        608,
+        688
+      ],
+      "id": "3570e94e-8612-4863-baf6-cb4a43e08db8",
+      "name": "Google Gemini Chat Model4",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "GdTlgo0E621i1anZ",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "calendar": {
+          "__rl": true,
+          "value": "joaomarcosa51@gmail.com",
+          "mode": "list",
+          "cachedResultName": "joaomarcosa51@gmail.com"
+        },
+        "start": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Start', ``, 'string') }}",
+        "end": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('End', ``, 'string') }}",
+        "useDefaultReminders": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Use_Default_Reminders', ``, 'boolean') }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        768,
+        688
+      ],
+      "id": "2aad5c35-59c7-483f-80ec-e16e61186549",
+      "name": "Create an event in Google Calendar",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "CTlNTLIVR7ZKILNm",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "calendar": {
+          "__rl": true,
+          "value": "joaomarcosa51@gmail.com",
+          "mode": "list",
+          "cachedResultName": "joaomarcosa51@gmail.com"
+        },
+        "timeMin": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('After', ``, 'string') }}",
+        "timeMax": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Before', ``, 'string') }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        912,
+        688
+      ],
+      "id": "b70af1e0-43f4-4869-ba57-6e9c362405ae",
+      "name": "Get many events in Google Calendar",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "CTlNTLIVR7ZKILNm",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dateTimeTool",
+      "typeVersion": 2,
+      "position": [
+        1072,
+        688
+      ],
+      "id": "9dfe4d52-4ec1-4988-9c8f-d8f79783baea",
+      "name": "Date & Time1"
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        256,
+        176
+      ],
+      "id": "aef1ab4b-3b76-4684-89d2-d97057af1672",
+      "name": "Simple Memory"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Agente de Email": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Envio de Email": {
+      "ai_tool": [
+        [
+          {
+            "node": "Agente de Email",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar Emails": {
+      "ai_tool": [
+        [
+          {
+            "node": "Agente de Email",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Agente de Contatos": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Criar Contatos": {
+      "ai_tool": [
+        [
+          {
+            "node": "Agente de Contatos",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar Contatos": {
+      "ai_tool": [
+        [
+          {
+            "node": "Agente de Contatos",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Agente de Email",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Agente de Contatos",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Agente de Mapas": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model3": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Agente de Mapas",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MCP Client": {
+      "ai_tool": [
+        [
+          {
+            "node": "Agente de Mapas",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Agente de Calendário": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model4": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Agente de Calendário",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create an event in Google Calendar": {
+      "ai_tool": [
+        [
+          {
+            "node": "Agente de Calendário",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get many events in Google Calendar": {
+      "ai_tool": [
+        [
+          {
+            "node": "Agente de Calendário",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Date & Time1": {
+      "ai_tool": [
+        [
+          {
+            "node": "Agente de Calendário",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "013b015c-e142-481b-a98a-42dda6e71726",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "b2b5fc60e2e092414a7c6b551d58d6f983e78f4b7feba71a25f9f802e16994a0"
+  },
+  "id": "2W0nAsHRAwRiUHOu",
+  "tags": []
+}
